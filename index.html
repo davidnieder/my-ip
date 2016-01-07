@@ -33,8 +33,12 @@
       <th colspan="2">Your Address</th>
     </tr>
     <tr>
-      <td>IP</td>
+      <td>Address</td>
       <td>{{ ip }}</td>
+    </tr>
+    <tr>
+      <td>Hostname</td>
+      <td id="hostnameCell"><a href="javascript:doDNSLookup();">Reverse DNS lookup</a></td>
     </tr>
     {% if headers -%}
     <tr>
@@ -48,5 +52,30 @@
     {% endfor -%}
     {% endif -%}
   </table>
+  <script type="text/javascript">
+    var endpoint = '{{ url_for('reverse_dns') }}';
+    var cell = document.getElementById('hostnameCell');
+
+    if (!(window.XMLHttpRequest && window.JSON))  {
+      cell.innerHTML = 'browser not supported'
+    }
+
+    function doDNSLookup()  {
+      var request = new XMLHttpRequest();
+      request.onreadystatechange = function() {
+        if (request.readyState == 4)  {
+          if (request.status == 200) {
+            var response = JSON.parse(request.responseText);
+            cell.innerHTML = response.error || response.hostname;
+          } else {
+            cell.innerHTML = 'network error';
+          }
+        }
+      };
+
+      request.open('GET', endpoint, true);
+      request.send();
+    }
+  </script>
 </body>
 </html>
