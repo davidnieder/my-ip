@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import sys
-import site
 
-sys.path.insert(0, '/var/www/misc/myip')
-site.addsitedir('/usr/lib/python-env/lib/python2.6/site-packages')
+activate_this = '/home/david/www-apps/myip/venv/bin/activate_this.py'
+with open(activate_this) as file_:
+    exec(file_.read(), dict(__file__=activate_this))
+
+sys.path.insert(0, '/home/david/www-apps/myip')
+
 
 from main import app as application

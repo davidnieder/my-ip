@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import socket
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 from jinja2 import FileSystemLoader
 
 
@@ -10,20 +8,21 @@ app = Flask(__name__)
 app.jinja_loader = FileSystemLoader(app.root_path)
 
 
-
 @app.route('/')
-def index():
+@app.route('/html')
+def html():
     ip = request.remote_addr
     headers = list(request.headers)
-
-    if request.args.get('json') == 'true':
-        if request.args.get('iponly') == 'true':
-            return jsonify(ip=ip)
-        return jsonify(ip=ip, headers=headers)
-
-    if request.args.get('iponly') == 'true':
-        return render_template('index.html', ip=ip)
     return render_template('index.html', ip=ip, headers=headers)
+
+@app.route('/plain')
+def plain():
+    body = '{}\n'.format(request.remote_addr)
+    return Response(body, mimetype="text/plain")
+
+@app.route('/json')
+def json():
+    return jsonify(ip=request.remote_addr)
 
 @app.route('/reverse-dns')
 def reverse_dns():
@@ -33,10 +32,4 @@ def reverse_dns():
         name = socket.gethostbyaddr(ip)[0]
         return jsonify(hostname=name)
     except socket.herror as e:
-        return jsonify(error=e[1])
-
-
-if __name__ == '__main__':
-    app.debug = True
-    app.run()
-
+        return jsonify(error=e.strerror)
